@@ -1,0 +1,37 @@
+// const move = (): void => {
+//   // if (JSON.stringify(snake) === JSON.stringify(destination)) {
+//   //   return;
+//   // }
+
+//   if ((snake[0].x + 30) > boardWidth || (snake[0].y) + 30 > boardHeight) {
+//     return;
+//   }
+
+//   // const headCoordinates = snake[0];
+//   // const newHeadCoordinates = {
+//   //   x: headCoordinates.x + 30,
+//   //   y: headCoordinates.y + 0,
+//   // };
+
+//   // const newSnake = [newHeadCoordinates, ...snake.slice(0, -1)];
+
+//   const newSnake = snake.map<ISnake>((piece: ISnake, index: number) => {
+//     const { x, y } = piece;
+//     // const { x: destinationX, y: destinationY } = destination[index];
+//     const { x: destinationX, y: destinationY } = direction;
+
+//     const newCoordinates = {
+//       // x: makeStep(x, boardWidth),
+//       x: x + destinationX,
+//       // y: makeStep(y, boardHeight),
+//       y,
+//     };
+
+//     console.log(newCoordinates);
+
+//     return newCoordinates;
+//   });
+//   // console.log(newSnake);
+
+//   setSnake(newSnake);
+// };
