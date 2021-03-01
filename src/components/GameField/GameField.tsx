@@ -8,21 +8,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, useRef } from 'react';
+import GameBoard from '../GameBoard/GameBoard';
 import constants from '../../constants';
+import { ICoordinates, IDirections, IGameField } from '../../interfaces';
+
 import './gameField.css';
-
-interface IGameField {
-  time: number,
-  snake: ICoordinates[],
-}
-
-interface ICoordinates {
-  x: number, y: number
-}
-
-interface IDirections {
-  [key: string]: ICoordinates,
-}
 
 let direction = {
   x: constants.CELL_SIZE,
@@ -56,69 +46,6 @@ const GameField: React.FC = () => {
   // const [isGameStarted, setIsGameStarted] = useState();
   // const [destination, setDestination] = useState<ICoordinates[]>([{ x: 0, y: 0 }]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const drawFood = () => {
-    if (!ctx) {
-      return;
-    }
-
-    ctx.fillStyle = 'red';
-
-    const { x, y } = food;
-    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-  };
-
-  const drawSnake = (): void => {
-    if (!ctx) {
-      return;
-    }
-
-    snake.forEach((piece, index) => {
-      const { x, y } = piece;
-
-      if (!index) {
-        ctx.fillStyle = 'yellow';
-        ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-      } else {
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-      }
-    });
-  };
-
-  const drawField = (): void => {
-    if (!ctx) {
-      return;
-    }
-
-    ctx.fillStyle = BOARD_COLOR;
-    ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
-  };
-
-  const draw = () => {
-    if (!ctx) {
-      return;
-    }
-
-    drawField();
-    drawFood();
-    drawSnake();
-  };
-
-  // const setRandomSnake = (): void => {
-  //   const foodCoordinates = {
-  //     x: getRandomCoordinate(BOARD_WIDTH, CELL_SIZE),
-  //     y: getRandomCoordinate(BOARD_HEIGHT, CELL_SIZE),
-  //   };
-
-  //   const isEmptyCell = !snake.some((piece) => compareCoordinates(piece, foodCoordinates));
-
-  //   if (!isEmptyCell) {
-  //     getNewFood();
-  //   } else {
-  //     setFood(foodCoordinates);
-  //   }
-  // };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -198,6 +125,7 @@ const GameField: React.FC = () => {
 
     return directions[key];
   };
+
   const handleOnKeydown = (e: React.KeyboardEvent): void => {
     const newDirection = getNewDirection(e.key, CELL_SIZE);
 
@@ -225,7 +153,6 @@ const GameField: React.FC = () => {
 
   const loop = () => {
     move();
-    draw();
   };
 
   useEffect(() => {
@@ -244,12 +171,10 @@ const GameField: React.FC = () => {
 
   return (
     <>
-      <canvas
-        width={BOARD_WIDTH}
-        height={BOARD_HEIGHT}
-        ref={canvasRef}
-        onKeyDown={handleOnKeydown}
-        tabIndex={0}
+      <GameBoard
+        snake={snake}
+        food={food}
+        handleOnKeydown={handleOnKeydown}
       />
     </>
   );
