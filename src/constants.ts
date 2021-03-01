@@ -1,6 +1,8 @@
 export default {
-  STEP: 30,
-  CELL_SIZE: 30,
+  STEP: 2,
+  CELL_SIZE: 20,
   BOARD_COLOR: '#50b943',
+  BOARD_WIDTH: 780,
+  BOARD_HEIGHT: 480,
   SNAKE_LENGTH: 4,
 };
