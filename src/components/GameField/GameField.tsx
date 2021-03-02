@@ -25,10 +25,9 @@ const setDirection = (newDirection: ICoordinates): void => {
 
 const GameField: React.FC = () => {
   const {
-    STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT, BOARD_COLOR,
+    STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
 
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null | undefined>(null);
   // const [gameField, setGameField] = useState<IGameField>({
   //   time: 0,
   //   snake: [{ x: 0, y: 0 }],
@@ -42,17 +41,13 @@ const GameField: React.FC = () => {
     { x: 0, y: 0 },
   ]);
   const [food, setFood] = useState<ICoordinates>({ x: 0, y: 0 });
+  const [score, setScore] = useState<number>(0);
   // const [timeout, setTimeoutId] = useState<NodeJS.Timeout>(setTimeout(() => {}, 0));
-  // const [isGameStarted, setIsGameStarted] = useState();
+  const [isGameInProgress, setIsGameInProgress] = useState(false);
   // const [destination, setDestination] = useState<ICoordinates[]>([{ x: 0, y: 0 }]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const gameContext = canvas?.getContext('2d');
-
-    setCtx(gameContext);
-
     setSnake(() => ([
       { x: 60, y: 0 },
       { x: 40, y: 0 },
@@ -61,6 +56,7 @@ const GameField: React.FC = () => {
     ]));
 
     getNewFood();
+    setIsGameInProgress(true);
   }, []);
 
   const move = (): void => {
@@ -82,6 +78,7 @@ const GameField: React.FC = () => {
 
     if (isFoodCell) {
       setSnake([newHeadCoordinates, ...snake]);
+      setScore((state) => state + 1);
       getNewFood();
     } else {
       setSnake([newHeadCoordinates, ...snake.slice(0, -1)]);
@@ -144,7 +141,7 @@ const GameField: React.FC = () => {
   };
 
   const checkGame = (): boolean => {
-    if (snake[0].x + CELL_SIZE > BOARD_WIDTH || snake[0].y + CELL_SIZE > BOARD_HEIGHT
+    if (snake[0].x + CELL_SIZE >= BOARD_WIDTH || snake[0].y + CELL_SIZE >= BOARD_HEIGHT
       || snake[0].x < 0 || snake[0].y < 0) {
       return true;
     }
@@ -155,7 +152,16 @@ const GameField: React.FC = () => {
     move();
   };
 
+  const toggleIsGameInProgress = () => {
+    setIsGameInProgress((state) => !state);
+  };
+
   useEffect(() => {
+    // console.log
+    if (!isGameInProgress) {
+      return;
+    }
+
     canvasRef.current?.focus();
     const isGameFinished = checkGame();
 
@@ -164,13 +170,24 @@ const GameField: React.FC = () => {
       return;
     }
 
-    const timeoutId = setTimeout(loop, 2000);
+    const timeoutId = setTimeout(loop, 200);
     // console.log('loop');
     return () => clearTimeout(timeoutId);
-  }, [snake, direction]);
+  }, [snake, direction, isGameInProgress]);
 
   return (
     <>
+      <p>
+        Score:
+        {' '}
+        {score}
+      </p>
+      <button
+        type="button"
+        onClick={toggleIsGameInProgress}
+      >
+        {isGameInProgress ? 'STOP' : 'CONTINUE'}
+      </button>
       <GameBoard
         snake={snake}
         food={food}

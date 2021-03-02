@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useRef, useCallback,
+  useState, useEffect, useRef, useCallback, useMemo,
 } from 'react';
 import constants from '../../constants';
 import './gameBoard.css';
@@ -17,10 +17,11 @@ interface IProps {
 
 const GameBoard: React.FC<IProps> = ({ food, snake, handleOnKeydown }) => {
   const {
-    STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT, BOARD_COLOR,
+    CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT, BOARD_COLOR,
   } = constants;
 
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null | undefined>(null);
+  const [isFullScreen, setIsFullScreeen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const drawFood = useCallback(() => {
@@ -78,15 +79,42 @@ const GameBoard: React.FC<IProps> = ({ food, snake, handleOnKeydown }) => {
     setCtx(gameContext);
   }, []);
 
+  const toggleFullScreen = () => {
+    setIsFullScreeen((state) => !state);
+  };
+
   useEffect(() => {
     draw();
   }, [food, snake, draw]);
 
+  const boardWidth = useMemo((): number => {
+    if (isFullScreen) {
+      return window.innerWidth;
+    }
+
+    return BOARD_WIDTH;
+  }, [BOARD_WIDTH, isFullScreen]);
+
+  const boardHeight = useMemo((): number => {
+    console.log('height');
+    if (isFullScreen) {
+      return window.innerHeight;
+    }
+
+    return BOARD_HEIGHT;
+  }, [BOARD_HEIGHT, isFullScreen]);
+
   return (
     <>
+      <button
+        type="button"
+        onClick={toggleFullScreen}
+      >
+        full screen
+      </button>
       <canvas
-        width={BOARD_WIDTH}
-        height={BOARD_HEIGHT}
+        width={boardWidth}
+        height={boardHeight}
         ref={canvasRef}
         onKeyDown={handleOnKeydown}
         tabIndex={0}
