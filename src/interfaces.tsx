@@ -41,3 +41,8 @@ export interface IMenuItem {
 export interface IGameFieldProps {
   openMenu: () => void;
 }
+
+export interface IScore {
+  name: string;
+  score: number;
+}

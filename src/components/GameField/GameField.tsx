@@ -50,6 +50,7 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const startNewGame = () => {
+    setScore(0);
     setSnake(() => ([
       { x: 60, y: 0 },
       { x: 40, y: 0 },
@@ -72,7 +73,6 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   }, []);
 
   const move = (): void => {
-    // console.log(direction.x, direction.y, 'move');
     const headCoordinates = snake[0];
     const newHeadCoordinates = {
       x: headCoordinates.x + direction.x,
@@ -80,8 +80,9 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
     };
 
     const isSnakeCell = snake.some((piece) => compareCoordinates(newHeadCoordinates, piece));
+    const isBoardCrossed = checkGame(newHeadCoordinates);
 
-    if (isSnakeCell) {
+    if (isSnakeCell || isBoardCrossed) {
       finishGame();
       return;
     }
@@ -99,7 +100,6 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
 
   const finishGame = () => {
     setIsGameFinished(true);
-    // console.log('finish');
   };
 
   const getRandomCoordinate = (fieldSize: number, cellSize: number): number => {
@@ -136,8 +136,8 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
     return directions[key];
   };
 
-  const handleOnKeydown = (e: React.KeyboardEvent): void => {
-    const newDirection = getNewDirection(e.key, CELL_SIZE);
+  const changeDirection = (key: string) => {
+    const newDirection = getNewDirection(key, CELL_SIZE);
 
     if (
       !newDirection
@@ -150,12 +150,19 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
     }
 
     setDirection(newDirection);
-    // console.log('change', newDirection, direction);
   };
 
-  const checkGame = (): boolean => {
-    if (snake[0].x + CELL_SIZE >= BOARD_WIDTH || snake[0].y + CELL_SIZE >= BOARD_HEIGHT
-      || (snake[0].x < 0) || snake[0].y < 0) {
+  const handleOnKeydown = (e: React.KeyboardEvent): void => {
+    changeDirection(e.key);
+
+    if (e.key === 'Space') {
+      toggleIsGameInProgress();
+    }
+  };
+
+  const checkGame = (coordinates: ICoordinates): boolean => {
+    if (coordinates.x >= BOARD_WIDTH || coordinates.y >= BOARD_HEIGHT
+      || (coordinates.x < 0) || coordinates.y < 0) {
       return true;
     }
     return false;
@@ -170,21 +177,12 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   };
 
   useEffect(() => {
-    // console.log
     if (!isGameInProgress) {
       return;
     }
 
     canvasRef.current?.focus();
-    const isFinished = checkGame();
-
-    if (isFinished) {
-      finishGame();
-      return;
-    }
-
     const timeoutId = setTimeout(loop, 200);
-    // console.log('loop');
     return () => clearTimeout(timeoutId);
   }, [snake, direction, isGameInProgress]);
 

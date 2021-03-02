@@ -28,8 +28,18 @@ const GameOverModal: React.FC<IGameOverModal> = ({
     } else {
       const savedStatisticsParsed = JSON.parse(savedStatistics) as IScore[];
       const newStatsData = [...savedStatisticsParsed, currentScore];
-      newStatsData.sort((a, b) => a.score - b.score);
-      localStorage.snakeStats = JSON.stringify(newStatsData);
+      const sortedData = newStatsData.sort((a, b) => {
+        if (a.score < b.score) {
+          return 1;
+        }
+
+        if (a.score > b.score) {
+          return -1;
+        }
+
+        return 0;
+      });
+      localStorage.snakeStats = JSON.stringify(sortedData.slice(0, 10));
     }
   };
 
@@ -56,6 +66,7 @@ const GameOverModal: React.FC<IGameOverModal> = ({
   useEffect(() => {
     if (!open) {
       setInputValue('');
+      setIsEmpty(true);
     }
   }, [open, setInputValue]);
 

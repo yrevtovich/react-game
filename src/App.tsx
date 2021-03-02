@@ -1,7 +1,10 @@
 /* eslint-disable quote-props */
 import React, { useState } from 'react';
 import Menu from './components/Menu/Menu';
+import Footer from './components/Footer/Footer';
 import GameField from './components/GameField/GameField';
+import Settings from './components/Settings/Settings';
+import Statistics from './components/Statistics/Statistics';
 import './App.css';
 
 const App: React.FC = () => {
@@ -24,8 +27,8 @@ const App: React.FC = () => {
   const pages: { [key: string]: JSX.Element } = {
     'New game': <GameField openMenu={openMenu} />,
     'Continue': <GameField openMenu={openMenu} />,
-    'Statistics': <Menu list={menuList} menuItemClick={changeOpened} />,
-    'Settings': <Menu list={menuList} menuItemClick={changeOpened} />,
+    'Statistics': <Statistics />,
+    'Settings': <Settings />,
     'Menu': <Menu list={menuList} menuItemClick={changeOpened} />,
   };
 
@@ -39,6 +42,7 @@ const App: React.FC = () => {
       {isStartPage
         ? <button onClick={closeStartPage} type="button">Press me...</button>
         : pages[opened]}
+      <Footer />
     </div>
   );
 };

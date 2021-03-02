@@ -25,16 +25,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 const Menu: React.FC<IMenu> = ({ list = [], menuItemClick }) => {
   const classes = useStyles();
 
-  useEffect(() => {
-    // const event = new Event('click');
-    // window.dispatchEvent(event);
-    const audio = new Audio(menuSound);
-    audio.loop = true;
-    // audio.volume = 0.9;
-    // audio.muted = true;
-    audio.play();
-    return () => audio.pause();
-  }, []);
+  // useEffect(() => {
+  //   const audio = new Audio(menuSound);
+  //   audio.loop = true;
+  //   audio.play();
+  //   return () => audio.pause();
+  // }, []);
 
   return (
     <div className={classes.root}>
