@@ -11,7 +11,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
 import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
-import { ICoordinates, IDirections, IGameField } from '../../interfaces';
+import { ICoordinates, IDirections, IGameFieldProps } from '../../interfaces';
 
 import './gameField.css';
 
@@ -24,7 +24,7 @@ const setDirection = (newDirection: ICoordinates): void => {
   direction = newDirection;
 };
 
-const GameField: React.FC = () => {
+const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   const {
     STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
@@ -210,6 +210,7 @@ const GameField: React.FC = () => {
         open={isGameFinished}
         score={score}
         restart={startNewGame}
+        openMenu={openMenu}
       />
     </>
   );

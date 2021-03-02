@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -8,27 +8,60 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { IGameOverModal } from '../../interfaces';
 
-const GameOverModal: React.FC<IGameOverModal> = ({ open, score, restart }) => {
-  // const [open, setOpen] = React.useState(false);
+interface IScore {
+  name: string;
+  score: number;
+}
+
+const GameOverModal: React.FC<IGameOverModal> = ({
+  open, score, restart, openMenu,
+}) => {
   const [inputValue, setInputValue] = useState<string>('');
+  const [isEmpty, setIsEmpty] = useState(true);
 
-  const handleClickOpen = () => {
-    // setOpen(true);
-  };
+  const saveStatistics = (): void => {
+    const savedStatistics = localStorage.getItem('snakeStats');
+    const currentScore: IScore = { name: inputValue, score };
 
-  const handleClose = () => {
-    // setOpen(false);
+    if (!savedStatistics) {
+      localStorage.snakeStats = JSON.stringify([currentScore]);
+    } else {
+      const savedStatisticsParsed = JSON.parse(savedStatistics) as IScore[];
+      const newStatsData = [...savedStatisticsParsed, currentScore];
+      newStatsData.sort((a, b) => a.score - b.score);
+      localStorage.snakeStats = JSON.stringify(newStatsData);
+    }
   };
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // console.log(e.target.value);
     setInputValue(e.target.value);
+
+    if (e.target.value.trim()) {
+      setIsEmpty(false);
+    } else {
+      setIsEmpty(true);
+    }
   };
+
+  const handleOnClickRestartButton = () => {
+    saveStatistics();
+    restart();
+  };
+
+  const handleOnClickMenuButton = () => {
+    saveStatistics();
+    openMenu();
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setInputValue('');
+    }
+  }, [open, setInputValue]);
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
       aria-labelledby="title"
       disableBackdropClick
       disableEscapeKeyDown
@@ -37,29 +70,31 @@ const GameOverModal: React.FC<IGameOverModal> = ({ open, score, restart }) => {
       <DialogTitle id="title">Game Over</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          You scored
-          {' '}
-          {score}
-          {' '}
-          points. Please, enter your name:
+          {`You scored ${score} points. Please, enter your name:`}
         </DialogContentText>
         <TextField
           autoFocus
           margin="dense"
           value={inputValue}
-          // id="name"
           label="Enter your name"
-          // type="email"
           fullWidth
           onChange={handleOnChange}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={restart as () => void} color="primary">
+        <Button
+          onClick={handleOnClickRestartButton}
+          color="primary"
+          disabled={isEmpty}
+        >
           Play again
         </Button>
-        <Button onClick={handleClose} color="primary">
-          Menu
+        <Button
+          onClick={handleOnClickMenuButton}
+          color="primary"
+          disabled={isEmpty}
+        >
+          Go to the menu
         </Button>
       </DialogActions>
     </Dialog>
