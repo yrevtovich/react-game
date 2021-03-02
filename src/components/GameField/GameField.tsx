@@ -9,6 +9,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, useRef } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
+import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
 import { ICoordinates, IDirections, IGameField } from '../../interfaces';
 
@@ -44,10 +45,11 @@ const GameField: React.FC = () => {
   const [score, setScore] = useState<number>(0);
   // const [timeout, setTimeoutId] = useState<NodeJS.Timeout>(setTimeout(() => {}, 0));
   const [isGameInProgress, setIsGameInProgress] = useState(false);
+  const [isGameFinished, setIsGameFinished] = useState(false);
   // const [destination, setDestination] = useState<ICoordinates[]>([{ x: 0, y: 0 }]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  const startNewGame = () => {
     setSnake(() => ([
       { x: 60, y: 0 },
       { x: 40, y: 0 },
@@ -55,8 +57,18 @@ const GameField: React.FC = () => {
       { x: 0, y: 0 },
     ]));
 
+    setDirection({
+      x: constants.CELL_SIZE,
+      y: 0,
+    });
+
     getNewFood();
     setIsGameInProgress(true);
+    setIsGameFinished(false);
+  };
+
+  useEffect(() => {
+    startNewGame();
   }, []);
 
   const move = (): void => {
@@ -86,7 +98,8 @@ const GameField: React.FC = () => {
   };
 
   const finishGame = () => {
-    console.log('finish');
+    setIsGameFinished(true);
+    // console.log('finish');
   };
 
   const getRandomCoordinate = (fieldSize: number, cellSize: number): number => {
@@ -142,7 +155,7 @@ const GameField: React.FC = () => {
 
   const checkGame = (): boolean => {
     if (snake[0].x + CELL_SIZE >= BOARD_WIDTH || snake[0].y + CELL_SIZE >= BOARD_HEIGHT
-      || snake[0].x < 0 || snake[0].y < 0) {
+      || (snake[0].x < 0) || snake[0].y < 0) {
       return true;
     }
     return false;
@@ -163,9 +176,9 @@ const GameField: React.FC = () => {
     }
 
     canvasRef.current?.focus();
-    const isGameFinished = checkGame();
+    const isFinished = checkGame();
 
-    if (isGameFinished) {
+    if (isFinished) {
       finishGame();
       return;
     }
@@ -192,6 +205,11 @@ const GameField: React.FC = () => {
         snake={snake}
         food={food}
         handleOnKeydown={handleOnKeydown}
+      />
+      <GameOverModal
+        open={isGameFinished}
+        score={score}
+        restart={startNewGame}
       />
     </>
   );

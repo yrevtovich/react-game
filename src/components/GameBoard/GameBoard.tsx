@@ -2,20 +2,10 @@ import React, {
   useState, useEffect, useRef, useCallback, useMemo,
 } from 'react';
 import constants from '../../constants';
+import { IGameBoardProps } from '../../interfaces';
 import './gameBoard.css';
 
-interface ICoordinates {
-  x: number, y: number
-}
-
-interface IProps {
-  food : ICoordinates,
-  snake: ICoordinates[],
-  handleOnKeydown: (e: React.KeyboardEvent) => void;
-  children?: React.ReactNode,
-}
-
-const GameBoard: React.FC<IProps> = ({ food, snake, handleOnKeydown }) => {
+const GameBoard: React.FC<IGameBoardProps> = ({ food, snake, handleOnKeydown }) => {
   const {
     CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT, BOARD_COLOR,
   } = constants;

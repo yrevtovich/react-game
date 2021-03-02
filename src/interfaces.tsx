@@ -11,9 +11,15 @@ export interface IGameField {
   snake: ICoordinates[],
 }
 
-export interface IProps {
+export interface IGameBoardProps {
   food : ICoordinates,
   snake: ICoordinates[],
-  handleOnKeydown: (e: React.KeyboardEvent) => void;
+  handleOnKeydown?: (e: React.KeyboardEvent) => void;
+  children?: React.ReactNode,
+}
+export interface IGameOverModal {
+  open: boolean,
+  score: number,
+  restart: () => void;
   children?: React.ReactNode,
 }
