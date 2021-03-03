@@ -7,6 +7,7 @@ import EqualizerIcon from '@material-ui/icons/Equalizer';
 import ReplayIcon from '@material-ui/icons/Replay';
 import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsOverscanIcon from '@material-ui/icons/SettingsOverscan';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 const useStyles = makeStyles(() => createStyles({
   root: {
@@ -31,6 +32,7 @@ interface IProps {
   toggleSettings: () => void;
   stopGame: () => void;
   toggleFullScreen: () => void;
+  toggleKeyboardKeys: () => void;
 }
 
 const Menu: React.FC<IProps> = ({
@@ -42,6 +44,7 @@ const Menu: React.FC<IProps> = ({
   toggleSettings,
   stopGame,
   toggleFullScreen,
+  toggleKeyboardKeys,
 }) => {
   const classes = useStyles();
 
@@ -72,6 +75,9 @@ const Menu: React.FC<IProps> = ({
         </IconButton>
         <IconButton color="primary" component="span" onClick={toggleFullScreen}>
           <SettingsOverscanIcon />
+        </IconButton>
+        <IconButton color="primary" component="span" onClick={handlerOpenModal(toggleKeyboardKeys)}>
+          <HelpOutlineIcon />
         </IconButton>
       </div>
     </div>

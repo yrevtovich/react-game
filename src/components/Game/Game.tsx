@@ -28,9 +28,10 @@ const setDirection = (newDirection: ICoordinates): void => {
 interface IProps {
   toggleStatistics: () => void;
   toggleSettings: () => void;
+  toggleKeyboardKeys: () => void;
 }
 
-const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings }) => {
+const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboardKeys }) => {
   const {
     STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
@@ -218,6 +219,7 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings }) => {
         toggleSettings={toggleSettings}
         stopGame={stopGame}
         toggleFullScreen={toggleFullScreen}
+        toggleKeyboardKeys={toggleKeyboardKeys}
         isGameInProgress={isGameInProgress}
         score={score}
       />

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import Grid from '@material-ui/core/Grid';
@@ -9,7 +8,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import ListItem from '@material-ui/core/ListItem';
-import request from '../../services/request';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -30,37 +28,32 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   statistics__headerBlock: {
     padding: '5px 20px',
-    // border: '1px solid #ffffff8c',
     border: '1px solid #dcdcdc8c',
     textAlign: 'center',
-    // backgroundColor: '#ffffff8c',
     backgroundColor: '#dcdcdc8c',
     '&:last-child': {
-      width: '35%',
+      width: '65%',
     },
     '&:first-child': {
-      width: '65%',
+      width: '35%',
     },
   },
   statistics__block: {
     padding: '5px 20px',
-    // border: '1px solid #ffffff8c',
     border: '1px solid #dcdcdc8c',
+    textAlign: 'center',
     '&:last-child': {
-      width: '35%',
-      textAlign: 'right',
+      width: '65%',
     },
     '&:first-child': {
-      width: '65%',
-      textAlign: 'left',
+      width: '35%',
     },
   },
 }));
 
-interface IStats {
-  _id: string;
-  name: string;
-  score: number;
+interface IKeys {
+  key: string;
+  description: string;
 }
 
 interface IProps {
@@ -68,21 +61,37 @@ interface IProps {
   handleOnClose: () => void;
 }
 
-const Statistics: React.FC<IProps> = ({ open, handleOnClose }) => {
+const KeyboardKeys: React.FC<IProps> = ({ open, handleOnClose }) => {
   const classes = useStyles();
 
-  const [data, setData] = useState<IStats[]>([]);
+  // const [data, setData] = useState<IScore[]>([]);
 
-  useEffect(() => {
-    const getStatistics = async () => {
-      const statsData = await request.get();
-      if (typeof statsData !== 'string') {
-        setData(statsData);
-      }
-    };
-
-    getStatistics();
-  }, []);
+  const data: IKeys[] = [
+    {
+      key: 'Arrow left',
+      description: 'Move left',
+    },
+    {
+      key: 'Arrow right',
+      description: 'Move right',
+    },
+    {
+      key: 'Arrow up',
+      description: 'Move up',
+    },
+    {
+      key: 'Arrow down',
+      description: 'Move down',
+    },
+    {
+      key: 'Space',
+      description: 'Pause/continue game',
+    },
+    {
+      key: 'F9',
+      description: 'Activate/deactivate fullscreen',
+    },
+  ];
 
   return (
     <Dialog
@@ -102,26 +111,23 @@ const Statistics: React.FC<IProps> = ({ open, handleOnClose }) => {
             <List className={classes.statistics__list}>
               <ListItem className={classes.statistics__listItem}>
                 <p className={classes.statistics__headerBlock}>
-                  Name
+                  Key
                 </p>
                 <p className={classes.statistics__headerBlock}>
-                  Score
+                  Description
                 </p>
               </ListItem>
               { data.length
-                ? data.map((item) => {
-                  const { _id: id } = item;
-                  return (
-                    <ListItem key={id} className={classes.statistics__listItem}>
-                      <p className={classes.statistics__block}>
-                        {item.name}
-                      </p>
-                      <p className={classes.statistics__block}>
-                        {item.score}
-                      </p>
-                    </ListItem>
-                  );
-                }) : (
+                ? data.map((item) => (
+                  <ListItem key={item.key} className={classes.statistics__listItem}>
+                    <p className={classes.statistics__block}>
+                      {item.key}
+                    </p>
+                    <p className={classes.statistics__block}>
+                      {item.description}
+                    </p>
+                  </ListItem>
+                )) : (
                   <p>
                     No data
                   </p>
@@ -142,4 +148,4 @@ const Statistics: React.FC<IProps> = ({ open, handleOnClose }) => {
   );
 };
 
-export default Statistics;
+export default KeyboardKeys;
