@@ -11,9 +11,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
 import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
-import { ICoordinates, IDirections, IGameFieldProps } from '../../interfaces';
+import { ICoordinates, IDirections } from '../../interfaces';
+import GameHeader from '../GameHeader/GameHeader';
 
-import './gameField.css';
+import './game.css';
 
 let direction = {
   x: constants.CELL_SIZE,
@@ -24,17 +25,15 @@ const setDirection = (newDirection: ICoordinates): void => {
   direction = newDirection;
 };
 
-const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
+interface IProps {
+  toggleStatistics: () => void;
+  toggleSettings: () => void;
+}
+
+const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings }) => {
   const {
     STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
-
-  // const [gameField, setGameField] = useState<IGameField>({
-  //   time: 0,
-  //   snake: [{ x: 0, y: 0 }],
-  // });
-  // const [time, setTime] = useState(0);
-  // const [direction, setDirection] = useState<ICoordinates>({ x: CELL_SIZE, y: 0 });
   const [snake, setSnake] = useState<ICoordinates[]>([
     { x: 90, y: 0 },
     { x: 60, y: 0 },
@@ -43,11 +42,16 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   ]);
   const [food, setFood] = useState<ICoordinates>({ x: 0, y: 0 });
   const [score, setScore] = useState<number>(0);
-  // const [timeout, setTimeoutId] = useState<NodeJS.Timeout>(setTimeout(() => {}, 0));
-  const [isGameInProgress, setIsGameInProgress] = useState(false);
-  const [isGameFinished, setIsGameFinished] = useState(false);
-  // const [destination, setDestination] = useState<ICoordinates[]>([{ x: 0, y: 0 }]);
+  const [isGameInProgress, setIsGameInProgress] = useState<boolean>(false);
+  const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
+  const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
+  const [isFullScreen, setIsFullScreeen] = useState(false);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const toggleFullScreen = () => {
+    setIsFullScreeen((state) => !state);
+  };
 
   const startNewGame = () => {
     setScore(0);
@@ -62,6 +66,8 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
       x: constants.CELL_SIZE,
       y: 0,
     });
+
+    setIsGameOverModal(false);
 
     getNewFood();
     setIsGameInProgress(true);
@@ -98,8 +104,13 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
     }
   };
 
+  const closeGameOverModal = () => {
+    setIsGameOverModal(false);
+  };
+
   const finishGame = () => {
     setIsGameFinished(true);
+    setIsGameOverModal(true);
   };
 
   const getRandomCoordinate = (fieldSize: number, cellSize: number): number => {
@@ -155,8 +166,12 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   const handleOnKeydown = (e: React.KeyboardEvent): void => {
     changeDirection(e.key);
 
-    if (e.key === 'Space') {
+    if (e.code === 'Space') {
       toggleIsGameInProgress();
+    }
+
+    if (e.code === 'F9') {
+      toggleFullScreen();
     }
   };
 
@@ -173,7 +188,15 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
   };
 
   const toggleIsGameInProgress = () => {
+    if (isGameFinished) {
+      return;
+    }
+
     setIsGameInProgress((state) => !state);
+  };
+
+  const stopGame = () => {
+    setIsGameInProgress(false);
   };
 
   useEffect(() => {
@@ -188,30 +211,30 @@ const GameField: React.FC<IGameFieldProps> = ({ openMenu }) => {
 
   return (
     <>
-      <p>
-        Score:
-        {' '}
-        {score}
-      </p>
-      <button
-        type="button"
-        onClick={toggleIsGameInProgress}
-      >
-        {isGameInProgress ? 'STOP' : 'CONTINUE'}
-      </button>
+      <GameHeader
+        toggleIsGameInProgress={toggleIsGameInProgress}
+        startNewGame={startNewGame}
+        toggleStatistics={toggleStatistics}
+        toggleSettings={toggleSettings}
+        stopGame={stopGame}
+        toggleFullScreen={toggleFullScreen}
+        isGameInProgress={isGameInProgress}
+        score={score}
+      />
       <GameBoard
         snake={snake}
         food={food}
         handleOnKeydown={handleOnKeydown}
+        isFullScreen={isFullScreen}
       />
       <GameOverModal
-        open={isGameFinished}
+        open={isGameOverModal}
         score={score}
         restart={startNewGame}
-        openMenu={openMenu}
+        close={closeGameOverModal}
       />
     </>
   );
 };
 
-export default GameField;
+export default Game;

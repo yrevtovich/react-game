@@ -4,13 +4,16 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
 import ListItem from '@material-ui/core/ListItem';
 import request from '../../services/request';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
     flexGrow: 1,
-    maxWidth: 752,
   },
   title: {
     margin: theme.spacing(4, 0, 2),
@@ -27,9 +30,11 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   statistics__headerBlock: {
     padding: '5px 20px',
-    border: '1px solid #ffffff8c',
+    // border: '1px solid #ffffff8c',
+    border: '1px solid #dcdcdc8c',
     textAlign: 'center',
-    backgroundColor: '#ffffff8c',
+    // backgroundColor: '#ffffff8c',
+    backgroundColor: '#dcdcdc8c',
     '&:last-child': {
       width: '35%',
     },
@@ -39,7 +44,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   statistics__block: {
     padding: '5px 20px',
-    border: '1px solid #ffffff8c',
+    // border: '1px solid #ffffff8c',
+    border: '1px solid #dcdcdc8c',
     '&:last-child': {
       width: '35%',
       textAlign: 'right',
@@ -55,7 +61,13 @@ interface IScore {
   name: string;
   score: number;
 }
-const Statistics: React.FC = () => {
+
+interface IProps {
+  open: boolean;
+  handleOnClose: () => void;
+}
+
+const Statistics: React.FC<IProps> = ({ open, handleOnClose }) => {
   const classes = useStyles();
 
   const [data, setData] = useState<IScore[]>([]);
@@ -72,40 +84,57 @@ const Statistics: React.FC = () => {
   }, []);
 
   return (
-    <div className={classes.root}>
-      <Grid container spacing={2} className={classes.statistics}>
-        <Grid item xs={12} md={12}>
-          <Typography variant="h6" className={classes.title}>
-            Statistics
-          </Typography>
-          <List className={classes.statistics__list}>
-            <ListItem className={classes.statistics__listItem}>
-              <p className={classes.statistics__headerBlock}>
-                Name
-              </p>
-              <p className={classes.statistics__headerBlock}>
-                Score
-              </p>
-            </ListItem>
-            { data.length
-              ? data.map((item) => (
-                <ListItem key={item.name} className={classes.statistics__listItem}>
-                  <p className={classes.statistics__block}>
-                    {item.name}
-                  </p>
-                  <p className={classes.statistics__block}>
-                    {item.score}
-                  </p>
-                </ListItem>
-              )) : (
-                <p>
-                  No data
+    <Dialog
+      open={open}
+      aria-labelledby="title"
+      disableBackdropClick
+      disableEscapeKeyDown
+      transitionDuration={1000}
+      className={classes.root}
+    >
+      <DialogContent>
+        <Grid container spacing={2} className={classes.statistics}>
+          <Grid item xs={12} md={12}>
+            <Typography variant="h6" className={classes.title}>
+              Statistics
+            </Typography>
+            <List className={classes.statistics__list}>
+              <ListItem className={classes.statistics__listItem}>
+                <p className={classes.statistics__headerBlock}>
+                  Name
                 </p>
-              )}
-          </List>
+                <p className={classes.statistics__headerBlock}>
+                  Score
+                </p>
+              </ListItem>
+              { data.length
+                ? data.map((item) => (
+                  <ListItem key={item.name} className={classes.statistics__listItem}>
+                    <p className={classes.statistics__block}>
+                      {item.name}
+                    </p>
+                    <p className={classes.statistics__block}>
+                      {item.score}
+                    </p>
+                  </ListItem>
+                )) : (
+                  <p>
+                    No data
+                  </p>
+                )}
+            </List>
+          </Grid>
         </Grid>
-      </Grid>
-    </div>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleOnClose}
+          color="primary"
+        >
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

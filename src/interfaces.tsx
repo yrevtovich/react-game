@@ -16,14 +16,8 @@ export interface IGameField {
 export interface IGameBoardProps {
   food : ICoordinates;
   snake: ICoordinates[];
+  isFullScreen: boolean;
   handleOnKeydown?: (e: React.KeyboardEvent) => void;
-  children?: React.ReactNode;
-}
-export interface IGameOverModal {
-  open: boolean;
-  score: number;
-  restart: () => void;
-  openMenu: () => void;
   children?: React.ReactNode;
 }
 

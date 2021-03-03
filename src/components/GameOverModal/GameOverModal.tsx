@@ -7,15 +7,22 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import request from '../../services/request';
-import { IGameOverModal } from '../../interfaces';
 
 interface IScore {
   name: string;
   score: number;
 }
 
-const GameOverModal: React.FC<IGameOverModal> = ({
-  open, score, restart, openMenu,
+interface IProps {
+  open: boolean;
+  score: number;
+  restart: () => void;
+  close: () => void;
+  children?: React.ReactNode;
+}
+
+const GameOverModal: React.FC<IProps> = ({
+  open, score, restart, close,
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [isEmpty, setIsEmpty] = useState(true);
@@ -40,9 +47,9 @@ const GameOverModal: React.FC<IGameOverModal> = ({
     restart();
   };
 
-  const handleOnClickMenuButton = async () => {
+  const handleOnClose = async () => {
     await saveStatistics();
-    openMenu();
+    close();
   };
 
   useEffect(() => {
@@ -83,11 +90,11 @@ const GameOverModal: React.FC<IGameOverModal> = ({
           Play again
         </Button>
         <Button
-          onClick={handleOnClickMenuButton}
+          onClick={handleOnClose}
           color="primary"
           disabled={isEmpty}
         >
-          Go to the menu
+          Close
         </Button>
       </DialogActions>
     </Dialog>
