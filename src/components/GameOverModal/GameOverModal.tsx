@@ -6,6 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import request from '../../services/request';
 import { IGameOverModal } from '../../interfaces';
 
 interface IScore {
@@ -19,28 +20,9 @@ const GameOverModal: React.FC<IGameOverModal> = ({
   const [inputValue, setInputValue] = useState<string>('');
   const [isEmpty, setIsEmpty] = useState(true);
 
-  const saveStatistics = (): void => {
-    const savedStatistics = localStorage.getItem('snakeStats');
+  const saveStatistics = async (): Promise<void> => {
     const currentScore: IScore = { name: inputValue, score };
-
-    if (!savedStatistics) {
-      localStorage.snakeStats = JSON.stringify([currentScore]);
-    } else {
-      const savedStatisticsParsed = JSON.parse(savedStatistics) as IScore[];
-      const newStatsData = [...savedStatisticsParsed, currentScore];
-      const sortedData = newStatsData.sort((a, b) => {
-        if (a.score < b.score) {
-          return 1;
-        }
-
-        if (a.score > b.score) {
-          return -1;
-        }
-
-        return 0;
-      });
-      localStorage.snakeStats = JSON.stringify(sortedData.slice(0, 10));
-    }
+    await request.post(currentScore);
   };
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,13 +35,13 @@ const GameOverModal: React.FC<IGameOverModal> = ({
     }
   };
 
-  const handleOnClickRestartButton = () => {
-    saveStatistics();
+  const handleOnClickRestartButton = async () => {
+    await saveStatistics();
     restart();
   };
 
-  const handleOnClickMenuButton = () => {
-    saveStatistics();
+  const handleOnClickMenuButton = async () => {
+    await saveStatistics();
     openMenu();
   };
 
