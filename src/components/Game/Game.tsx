@@ -1,12 +1,5 @@
-/* eslint-disable arrow-body-style */
 /* eslint-disable consistent-return */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable prefer-const */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, useRef } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
 import GameOverModal from '../GameOverModal/GameOverModal';
@@ -33,7 +26,7 @@ interface IProps {
 
 const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboardKeys }) => {
   const {
-    STEP, CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
+    CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
   const [snake, setSnake] = useState<ICoordinates[]>([
     { x: 90, y: 0 },
@@ -52,6 +45,27 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
 
   const toggleFullScreen = () => {
     setIsFullScreeen((state) => !state);
+  };
+
+  const getRandomCoordinate = (fieldSize: number, cellSize: number): number => (
+    Math.floor(Math.random() * (fieldSize / cellSize)) * cellSize);
+
+  const compareCoordinates = (first: ICoordinates, second: ICoordinates): boolean => (
+    first.x === second.x && first.y === second.y);
+
+  const getNewFood = () => {
+    const foodCoordinates = {
+      x: getRandomCoordinate(BOARD_WIDTH, CELL_SIZE),
+      y: getRandomCoordinate(BOARD_HEIGHT, CELL_SIZE),
+    };
+
+    const isEmptyCell = !snake.some((piece) => compareCoordinates(piece, foodCoordinates));
+
+    if (!isEmptyCell) {
+      getNewFood();
+    } else {
+      setFood(foodCoordinates);
+    }
   };
 
   const startNewGame = () => {
@@ -75,36 +89,6 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     setIsGameFinished(false);
   };
 
-  useEffect(() => {
-    startNewGame();
-  }, []);
-
-  const move = (): void => {
-    const headCoordinates = snake[0];
-    const newHeadCoordinates = {
-      x: headCoordinates.x + direction.x,
-      y: headCoordinates.y + direction.y,
-    };
-
-    const isSnakeCell = snake.some((piece) => compareCoordinates(newHeadCoordinates, piece));
-    const isBoardCrossed = checkGame(newHeadCoordinates);
-
-    if (isSnakeCell || isBoardCrossed) {
-      finishGame();
-      return;
-    }
-
-    const isFoodCell = compareCoordinates(newHeadCoordinates, food);
-
-    if (isFoodCell) {
-      setSnake([newHeadCoordinates, ...snake]);
-      setScore((state) => state + 1);
-      getNewFood();
-    } else {
-      setSnake([newHeadCoordinates, ...snake.slice(0, -1)]);
-    }
-  };
-
   const closeGameOverModal = () => {
     setIsGameOverModal(false);
   };
@@ -112,29 +96,6 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
   const finishGame = () => {
     setIsGameFinished(true);
     setIsGameOverModal(true);
-  };
-
-  const getRandomCoordinate = (fieldSize: number, cellSize: number): number => {
-    return Math.floor(Math.random() * (fieldSize / cellSize)) * cellSize;
-  };
-
-  const compareCoordinates = (first: ICoordinates, second: ICoordinates): boolean => {
-    return first.x === second.x && first.y === second.y;
-  };
-
-  const getNewFood = () => {
-    const foodCoordinates = {
-      x: getRandomCoordinate(BOARD_WIDTH, CELL_SIZE),
-      y: getRandomCoordinate(BOARD_HEIGHT, CELL_SIZE),
-    };
-
-    const isEmptyCell = !snake.some((piece) => compareCoordinates(piece, foodCoordinates));
-
-    if (!isEmptyCell) {
-      getNewFood();
-    } else {
-      setFood(foodCoordinates);
-    }
   };
 
   const getNewDirection = (key: string, step: number): ICoordinates | undefined => {
@@ -164,6 +125,14 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     setDirection(newDirection);
   };
 
+  const toggleIsGameInProgress = () => {
+    if (isGameFinished) {
+      return;
+    }
+
+    setIsGameInProgress((state) => !state);
+  };
+
   const handleOnKeydown = (e: React.KeyboardEvent): void => {
     changeDirection(e.key);
 
@@ -184,21 +153,44 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     return false;
   };
 
-  const loop = () => {
-    move();
-  };
+  const move = (): void => {
+    const headCoordinates = snake[0];
+    const newHeadCoordinates = {
+      x: headCoordinates.x + direction.x,
+      y: headCoordinates.y + direction.y,
+    };
 
-  const toggleIsGameInProgress = () => {
-    if (isGameFinished) {
+    const isSnakeCell = snake.some((piece) => compareCoordinates(newHeadCoordinates, piece));
+    const isBoardCrossed = checkGame(newHeadCoordinates);
+
+    if (isSnakeCell || isBoardCrossed) {
+      finishGame();
       return;
     }
 
-    setIsGameInProgress((state) => !state);
+    const isFoodCell = compareCoordinates(newHeadCoordinates, food);
+
+    if (isFoodCell) {
+      setSnake([newHeadCoordinates, ...snake]);
+      setScore((state) => state + 1);
+      getNewFood();
+    } else {
+      setSnake([newHeadCoordinates, ...snake.slice(0, -1)]);
+    }
+  };
+
+  const loop = () => {
+    move();
   };
 
   const stopGame = () => {
     setIsGameInProgress(false);
   };
+
+  useEffect(() => {
+    canvasRef.current?.focus();
+    startNewGame();
+  }, []);
 
   useEffect(() => {
     if (!isGameInProgress) {
@@ -207,7 +199,9 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
 
     canvasRef.current?.focus();
     const timeoutId = setTimeout(loop, 200);
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [snake, direction, isGameInProgress]);
 
   return (
