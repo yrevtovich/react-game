@@ -19,6 +19,7 @@ export interface IGameBoardProps {
   isFullScreen: boolean;
   handleOnKeydown?: (e: React.KeyboardEvent) => void;
   children?: React.ReactNode;
+  isGameFinished: boolean;
 }
 
 export interface IMenu {

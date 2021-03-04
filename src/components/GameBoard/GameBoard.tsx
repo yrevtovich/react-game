@@ -6,7 +6,7 @@ import { IGameBoardProps } from '../../interfaces';
 import './gameBoard.css';
 
 const GameBoard: React.FC<IGameBoardProps> = ({
-  food, snake, handleOnKeydown, isFullScreen,
+  food, snake, handleOnKeydown, isFullScreen, isGameFinished,
 }) => {
   const {
     CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT, BOARD_COLOR,
@@ -71,7 +71,19 @@ const GameBoard: React.FC<IGameBoardProps> = ({
   }, []);
 
   useEffect(() => {
+    const focusCanvas = () => {
+      if (!isGameFinished) {
+        canvasRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', focusCanvas);
+    return () => window.removeEventListener('keydown', focusCanvas);
+  }, [isGameFinished, handleOnKeydown]);
+
+  useEffect(() => {
     draw();
+    canvasRef.current?.focus();
   }, [food, snake, draw]);
 
   return (

@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable consistent-return */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
 import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
@@ -24,6 +26,15 @@ interface IProps {
   toggleKeyboardKeys: () => void;
 }
 
+interface ISavedData {
+  snake: ICoordinates[];
+  food: ICoordinates;
+  score: number;
+  isGameInProgress: boolean;
+  isGameFinished: boolean;
+  direction: ICoordinates;
+}
+
 const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboardKeys }) => {
   const {
     CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
@@ -40,8 +51,6 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreeen] = useState(false);
-
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const toggleFullScreen = () => {
     setIsFullScreeen((state) => !state);
@@ -188,8 +197,19 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
   };
 
   useEffect(() => {
-    canvasRef.current?.focus();
-    startNewGame();
+    const data = localStorage.snakeGameData;
+
+    if (data) {
+      const savedData: ISavedData = JSON.parse(data);
+      setSnake(savedData.snake);
+      setFood(savedData.food);
+      setDirection(savedData.direction);
+      setIsGameFinished(savedData.isGameFinished);
+      setIsGameInProgress(false);
+    } else {
+      startNewGame();
+      setIsGameInProgress(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -197,10 +217,24 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
       return;
     }
 
-    canvasRef.current?.focus();
     const timeoutId = setTimeout(loop, 200);
+    const save = () => {
+      const data = {
+        snake,
+        direction,
+        food,
+        score,
+        isGameInProgress,
+        isGameFinished,
+      };
+
+      localStorage.snakeGameData = JSON.stringify(data);
+    };
+
+    window.addEventListener('beforeunload', save);
     return () => {
       clearTimeout(timeoutId);
+      window.removeEventListener('beforeunload', save);
     };
   }, [snake, direction, isGameInProgress]);
 
@@ -222,6 +256,7 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
         food={food}
         handleOnKeydown={handleOnKeydown}
         isFullScreen={isFullScreen}
+        isGameFinished={isGameFinished}
       />
       <GameOverModal
         open={isGameOverModal}
