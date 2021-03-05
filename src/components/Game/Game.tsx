@@ -282,11 +282,6 @@ const Game: React.FC<IProps> = ({
   }, [isGameInProgress, settings]);
 
   useEffect(() => {
-    if (!isGameInProgress) {
-      return undefined;
-    }
-
-    const timeoutId = setTimeout(move, 500 / snakeSpeed);
     const save = () => {
       const data = {
         snake,
@@ -301,6 +296,12 @@ const Game: React.FC<IProps> = ({
     };
 
     window.addEventListener('beforeunload', save);
+
+    if (!isGameInProgress) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(move, 500 / snakeSpeed);
     return () => {
       window.removeEventListener('beforeunload', save);
       clearTimeout(timeoutId);
