@@ -71,6 +71,10 @@ const Statistics: React.FC<IProps> = ({ open, handleOnClose }) => {
   const [data, setData] = useState<IStats[]>([]);
 
   useEffect(() => {
+    if (!open) {
+      return;
+    }
+
     const getStatistics = async () => {
       const statsData = await request.get();
       if (typeof statsData !== 'string') {
@@ -79,7 +83,7 @@ const Statistics: React.FC<IProps> = ({ open, handleOnClose }) => {
     };
 
     getStatistics();
-  }, []);
+  }, [open]);
 
   return (
     <Dialog
