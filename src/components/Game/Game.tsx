@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
@@ -8,6 +6,11 @@ import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
 import { ICoordinates, IDirections } from '../../interfaces';
 import GameHeader from '../GameHeader/GameHeader';
+
+import menuSoundFile from '../../assets/audio/menu_music.mp3';
+import gameMusicFile from '../../assets/audio/game_music.mp3';
+import eatSoundFile from '../../assets/audio/eat.mp3';
+import incorrectSoundFile from '../../assets/audio/incorrect.mp3';
 
 import './game.css';
 
@@ -24,6 +27,7 @@ interface IProps {
   toggleStatistics: () => void;
   toggleSettings: () => void;
   toggleKeyboardKeys: () => void;
+  settings: ISettings;
 }
 
 interface ISavedData {
@@ -35,7 +39,18 @@ interface ISavedData {
   direction: ICoordinates;
 }
 
-const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboardKeys }) => {
+interface ISettings {
+  applicationMusic: boolean,
+  applicationMusicVolume: number,
+  gameMusic: boolean,
+  gameMusicVolume: number,
+  gameSounds: boolean,
+  gameSoundsVolume: number,
+}
+
+const Game: React.FC<IProps> = ({
+  toggleStatistics, toggleSettings, toggleKeyboardKeys, settings,
+}) => {
   const {
     CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
@@ -51,6 +66,7 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreeen] = useState(false);
+  const [audio] = useState<HTMLAudioElement>(new Audio());
 
   const toggleFullScreen = () => {
     setIsFullScreeen((state) => !state);
@@ -102,7 +118,23 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     setIsGameOverModal(false);
   };
 
+  const playSound = (soundUrl: string) => {
+    const { gameSounds, gameSoundsVolume } = settings;
+
+    if (!gameSounds) {
+      return;
+    }
+    const newAudio = new Audio(soundUrl);
+    newAudio.volume = gameSoundsVolume / 10;
+    newAudio.play();
+  };
+
   const finishGame = () => {
+    playSound(incorrectSoundFile);
+    setTimeout(() => {
+      setIsGameInProgress(false);
+    }, 2000);
+    audio.pause();
     setIsGameFinished(true);
     setIsGameOverModal(true);
   };
@@ -180,6 +212,7 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     const isFoodCell = compareCoordinates(newHeadCoordinates, food);
 
     if (isFoodCell) {
+      playSound(eatSoundFile);
       setSnake([newHeadCoordinates, ...snake]);
       setScore((state) => state + 1);
       getNewFood();
@@ -196,11 +229,21 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     setIsGameInProgress(false);
   };
 
+  const changeAudioParameters = (file: string, volume: number) => {
+    const srcRegExp = new RegExp(`${file}`);
+
+    if (!srcRegExp.exec(audio.src)) {
+      audio.src = file;
+    }
+
+    audio.volume = volume / 10;
+  };
+
   useEffect(() => {
-    const data = localStorage.snakeGameData;
+    const data = localStorage.getItem('snakeGameData');
 
     if (data) {
-      const savedData: ISavedData = JSON.parse(data);
+      const savedData = JSON.parse(data) as ISavedData;
       setSnake(savedData.snake);
       setFood(savedData.food);
       setDirection(savedData.direction);
@@ -213,8 +256,39 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
   }, []);
 
   useEffect(() => {
-    if (!isGameInProgress) {
+    const {
+      applicationMusic,
+      applicationMusicVolume,
+      gameMusicVolume,
+      gameMusic,
+    } = settings;
+
+    if ((!gameMusic && !applicationMusic)
+      || (!applicationMusic && !isGameInProgress)
+      || (!gameMusic && isGameInProgress)
+    ) {
+      audio.pause();
       return;
+    }
+
+    if (isGameInProgress) {
+      changeAudioParameters(gameMusicFile, gameMusicVolume);
+    } else {
+      changeAudioParameters(menuSoundFile, applicationMusicVolume);
+    }
+
+    audio.loop = true;
+
+    if (audio.paused) {
+      // setTimeout(() => {
+      audio.play();
+      // }, 1000);
+    }
+  }, [isGameInProgress, settings]);
+
+  useEffect(() => {
+    if (!isGameInProgress) {
+      return undefined;
     }
 
     const timeoutId = setTimeout(loop, 200);
@@ -233,10 +307,10 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
 
     window.addEventListener('beforeunload', save);
     return () => {
-      clearTimeout(timeoutId);
       window.removeEventListener('beforeunload', save);
+      clearTimeout(timeoutId);
     };
-  }, [snake, direction, isGameInProgress]);
+  }, [snake, isGameInProgress, food, score, isGameFinished]);
 
   return (
     <>

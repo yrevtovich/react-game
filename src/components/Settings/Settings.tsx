@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import List from '@material-ui/core/List';
@@ -8,48 +7,47 @@ import Typography from '@material-ui/core/Typography';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 
 import VolumeSlider from '../VolumeSlider/VolumeSlider';
+import Switcher from '../Switcher/Switcher';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
     flexGrow: 1,
   },
-  demo: {
-    backgroundColor: theme.palette.background.paper,
-  },
   title: {
-    margin: theme.spacing(4, 0, 2),
+    margin: theme.spacing(2, 0, 2),
+    textAlign: 'center',
   },
 }));
 
-interface IScore {
-  name: string;
-  score: number;
+interface ISettings {
+  applicationMusic: boolean,
+  applicationMusicVolume: number,
+  gameMusic: boolean,
+  gameMusicVolume: number,
+  gameSounds: boolean,
+  gameSoundsVolume: number,
 }
-
 interface IProps {
   open: boolean;
   handleOnClose: () => void;
+  changeSettings: (newSettings: ISettings) => void;
+  settings: ISettings
 }
 
-type Storage = string | undefined;
+type SettingsParameter = { [key: string]: boolean | number };
 
-const Settings: React.FC<IProps> = ({ open, handleOnClose }) => {
-  const [data, setData] = useState<IScore[]>([]);
-
+const Settings: React.FC<IProps> = ({
+  open, handleOnClose, changeSettings, settings,
+}) => {
   const classes = useStyles();
 
-  useEffect(() => {
-    const stats = localStorage.snakeStats as Storage;
-    if (stats) {
-      const statsData = JSON.parse(stats) as IScore[];
-      setData(statsData);
-    }
-  }, []);
+  const changeOneSettingsParameter = (param: SettingsParameter) => {
+    changeSettings({ ...settings, ...param });
+  };
 
   return (
     <Dialog
@@ -69,39 +67,63 @@ const Settings: React.FC<IProps> = ({ open, handleOnClose }) => {
             <List>
               <ListItem>
                 <ListItemText
-                  primary="Menu music ON/OFF"
+                  primary="Application music ON/OFF"
                 />
-                <Checkbox checked />
+                <Switcher
+                  name="applicationMusic"
+                  value={settings.applicationMusic}
+                  changeOneSettingsParameter={changeOneSettingsParameter}
+                />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Menu music volume"
+                  primary="Application music volume"
                 />
-                <VolumeSlider />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Game music ON/OFF"
+                <VolumeSlider
+                  name="applicationMusicVolume"
+                  value={settings.applicationMusicVolume}
+                  changeOneSettingsParameter={changeOneSettingsParameter}
                 />
-                <Checkbox checked />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Menu music volume"
-                />
-                <VolumeSlider />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Game music ON/OFF"
                 />
-                <Checkbox checked />
+                <Switcher
+                  name="gameMusic"
+                  value={settings.gameMusic}
+                  changeOneSettingsParameter={changeOneSettingsParameter}
+                />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Menu music volume"
+                  primary="Game music volume"
                 />
-                <VolumeSlider />
+                <VolumeSlider
+                  name="gameMusicVolume"
+                  value={settings.gameMusicVolume}
+                  changeOneSettingsParameter={changeOneSettingsParameter}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Game sounds ON/OFF"
+                />
+                <Switcher
+                  name="gameSounds"
+                  value={settings.gameSounds}
+                  changeOneSettingsParameter={changeOneSettingsParameter}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Game sounds volume"
+                />
+                <VolumeSlider
+                  name="gameSoundsVolume"
+                  value={settings.gameSoundsVolume}
+                  changeOneSettingsParameter={changeOneSettingsParameter}
+                />
               </ListItem>
             </List>
           </Grid>

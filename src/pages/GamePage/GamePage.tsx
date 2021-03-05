@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import React, { useState, useEffect } from 'react';
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Footer from '../../components/Footer/Footer';
@@ -6,8 +5,7 @@ import Game from '../../components/Game/Game';
 import Settings from '../../components/Settings/Settings';
 import Statistics from '../../components/Statistics/Statistics';
 import KeyboardKeys from '../../components/KeyboardKeys/KeyboardKeys';
-
-import menuSound from '../../assets/audio/menu_music.mp3';
+import constants from '../../constants';
 
 const useStyles = makeStyles(() => createStyles({
   root: {
@@ -23,7 +21,17 @@ const useStyles = makeStyles(() => createStyles({
   },
 }));
 
+interface ISettings {
+  applicationMusic: boolean,
+  applicationMusicVolume: number,
+  gameMusic: boolean,
+  gameMusicVolume: number,
+  gameSounds: boolean,
+  gameSoundsVolume: number,
+}
+
 const GamePage: React.FC = () => {
+  const [settings, setSettings] = useState<ISettings>(constants.DEFAULT_SETTINGS);
   const [isStatisticsOpened, setIsStatisticsOpened] = useState<boolean>(false);
   const [isSettingsOpened, setIsSettingsOpened] = useState<boolean>(false);
   const [isKeyboardKeysOpened, setIsKeyboardKeysOpened] = useState<boolean>(false);
@@ -41,12 +49,22 @@ const GamePage: React.FC = () => {
     setIsKeyboardKeysOpened((state) => !state);
   };
 
-  // useEffect(() => {
-  //   const audio = new Audio(menuSound);
-  //   audio.loop = true;
-  //   audio.play();
-  //   return () => audio.pause();
-  // }, []);
+  const changeSettings = (newSettings: ISettings) => {
+    setSettings(newSettings);
+  };
+
+  useEffect(() => {
+    const data = localStorage.getItem('snakeGameSettings');
+
+    if (data) {
+      const savedData = JSON.parse(data) as ISettings;
+      setSettings(savedData);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.snakeGameSettings = JSON.stringify(settings);
+  }, [settings]);
 
   return (
     <div className={classes.root}>
@@ -54,6 +72,7 @@ const GamePage: React.FC = () => {
         toggleStatistics={toggleStatistics}
         toggleSettings={toggleSettings}
         toggleKeyboardKeys={toggleKeyboardKeys}
+        settings={settings}
       />
       <Statistics
         open={isStatisticsOpened}
@@ -62,6 +81,8 @@ const GamePage: React.FC = () => {
       <Settings
         open={isSettingsOpened}
         handleOnClose={toggleSettings}
+        changeSettings={changeSettings}
+        settings={settings}
       />
       <KeyboardKeys
         open={isKeyboardKeysOpened}

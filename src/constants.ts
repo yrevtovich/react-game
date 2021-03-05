@@ -5,4 +5,12 @@ export default {
   BOARD_WIDTH: 780,
   BOARD_HEIGHT: 480,
   SNAKE_LENGTH: 4,
+  DEFAULT_SETTINGS: {
+    applicationMusic: true,
+    applicationMusicVolume: 5,
+    gameMusic: true,
+    gameMusicVolume: 5,
+    gameSounds: true,
+    gameSoundsVolume: 5,
+  },
 };

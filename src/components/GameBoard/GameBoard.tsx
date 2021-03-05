@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useRef, useCallback, useMemo,
+  useState, useEffect, useRef, useCallback,
 } from 'react';
 import constants from '../../constants';
 import { IGameBoardProps } from '../../interfaces';
