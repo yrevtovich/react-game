@@ -12,5 +12,11 @@ export default {
     gameMusicVolume: 5,
     gameSounds: true,
     gameSoundsVolume: 5,
+    snakeSpeed: 2,
+    snakeHeadColor: '#ffff00',
+    snakeBodyColor: '#0000ff',
+    snakeFieldColor: '#50b943',
+    snakeFoodColor: '#ff0000',
+    snakeGrowth: true,
   },
 };

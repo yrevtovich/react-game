@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
 import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
-import { ICoordinates, IDirections } from '../../interfaces';
+import { ICoordinates, IDirections, ISettings } from '../../interfaces';
 import GameHeader from '../GameHeader/GameHeader';
 
 import menuSoundFile from '../../assets/audio/menu_music.mp3';
@@ -39,17 +39,11 @@ interface ISavedData {
   direction: ICoordinates;
 }
 
-interface ISettings {
-  applicationMusic: boolean,
-  applicationMusicVolume: number,
-  gameMusic: boolean,
-  gameMusicVolume: number,
-  gameSounds: boolean,
-  gameSoundsVolume: number,
-}
-
 const Game: React.FC<IProps> = ({
-  toggleStatistics, toggleSettings, toggleKeyboardKeys, settings,
+  toggleStatistics,
+  toggleSettings,
+  toggleKeyboardKeys,
+  settings,
 }) => {
   const {
     CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
@@ -67,6 +61,7 @@ const Game: React.FC<IProps> = ({
   const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreeen] = useState(false);
   const [audio] = useState<HTMLAudioElement>(new Audio());
+  const [snakeSpeed, setSnakeSpeed] = useState<number>(settings.snakeSpeed);
 
   const toggleFullScreen = () => {
     setIsFullScreeen((state) => !state);
@@ -112,6 +107,7 @@ const Game: React.FC<IProps> = ({
     getNewFood();
     setIsGameInProgress(true);
     setIsGameFinished(false);
+    setSnakeSpeed(settings.snakeSpeed);
   };
 
   const closeGameOverModal = () => {
@@ -213,16 +209,17 @@ const Game: React.FC<IProps> = ({
 
     if (isFoodCell) {
       playSound(eatSoundFile);
-      setSnake([newHeadCoordinates, ...snake]);
+
+      const newSnake = settings.snakeGrowth
+        ? [newHeadCoordinates, ...snake]
+        : [newHeadCoordinates, ...snake.slice(0, -1)];
+
+      setSnake(newSnake);
       setScore((state) => state + 1);
       getNewFood();
     } else {
       setSnake([newHeadCoordinates, ...snake.slice(0, -1)]);
     }
-  };
-
-  const loop = () => {
-    move();
   };
 
   const stopGame = () => {
@@ -280,9 +277,7 @@ const Game: React.FC<IProps> = ({
     audio.loop = true;
 
     if (audio.paused) {
-      // setTimeout(() => {
       audio.play();
-      // }, 1000);
     }
   }, [isGameInProgress, settings]);
 
@@ -291,7 +286,7 @@ const Game: React.FC<IProps> = ({
       return undefined;
     }
 
-    const timeoutId = setTimeout(loop, 200);
+    const timeoutId = setTimeout(move, 500 / snakeSpeed);
     const save = () => {
       const data = {
         snake,
@@ -310,7 +305,7 @@ const Game: React.FC<IProps> = ({
       window.removeEventListener('beforeunload', save);
       clearTimeout(timeoutId);
     };
-  }, [snake, isGameInProgress, food, score, isGameFinished]);
+  }, [snake, isGameInProgress, food, score, isGameFinished, snakeSpeed]);
 
   return (
     <>
@@ -328,6 +323,7 @@ const Game: React.FC<IProps> = ({
       <GameBoard
         snake={snake}
         food={food}
+        settings={settings}
         handleOnKeydown={handleOnKeydown}
         isFullScreen={isFullScreen}
         isGameFinished={isGameFinished}

@@ -30,10 +30,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   statistics__headerBlock: {
     padding: '5px 20px',
-    // border: '1px solid #ffffff8c',
     border: '1px solid #dcdcdc8c',
     textAlign: 'center',
-    // backgroundColor: '#ffffff8c',
     backgroundColor: '#dcdcdc8c',
     '&:last-child': {
       width: '35%',
@@ -44,7 +42,6 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   statistics__block: {
     padding: '5px 20px',
-    // border: '1px solid #ffffff8c',
     border: '1px solid #dcdcdc8c',
     '&:last-child': {
       width: '35%',

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   useState, useEffect, useRef, useCallback,
 } from 'react';
@@ -6,21 +7,25 @@ import { IGameBoardProps } from '../../interfaces';
 import './gameBoard.css';
 
 const GameBoard: React.FC<IGameBoardProps> = ({
-  food, snake, handleOnKeydown, isFullScreen, isGameFinished,
+  food,
+  snake,
+  handleOnKeydown,
+  isFullScreen,
+  isGameFinished,
+  settings,
 }) => {
-  const {
-    CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT, BOARD_COLOR,
-  } = constants;
-
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null | undefined>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const { CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT } = constants;
 
   const drawFood = useCallback(() => {
     if (!ctx) {
       return;
     }
 
-    ctx.fillStyle = 'red';
+    const color: string = settings.snakeFoodColor;
+    ctx.fillStyle = color;
 
     const { x, y } = food;
     ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -35,23 +40,23 @@ const GameBoard: React.FC<IGameBoardProps> = ({
       const { x, y } = piece;
 
       if (!index) {
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = settings.snakeHeadColor;
         ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
       } else {
-        ctx.fillStyle = 'blue';
+        ctx.fillStyle = settings.snakeBodyColor;
         ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
       }
     });
-  }, [CELL_SIZE, ctx, snake]);
+  }, [CELL_SIZE, ctx, snake, settings]);
 
   const drawField = useCallback((): void => {
     if (!ctx) {
       return;
     }
 
-    ctx.fillStyle = BOARD_COLOR;
+    ctx.fillStyle = settings.snakeFieldColor;
     ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
-  }, [BOARD_COLOR, BOARD_HEIGHT, BOARD_WIDTH, ctx]);
+  }, [settings, BOARD_HEIGHT, BOARD_WIDTH, ctx]);
 
   const draw = useCallback(() => {
     if (!ctx) {

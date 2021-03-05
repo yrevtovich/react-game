@@ -20,31 +20,39 @@ const useStyles = makeStyles({
 type SettingsParameter = { [key: string]: number };
 
 interface IProps {
-  name: string,
-  value: number,
+  name: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  marks: boolean;
   changeOneSettingsParameter: (param: SettingsParameter) => void;
 }
 
-const VolumeSlider: React.FC<IProps> = ({ name, value, changeOneSettingsParameter }) => {
+const VolumeSlider: React.FC<IProps> = ({
+  name, value, min, max, step, marks, changeOneSettingsParameter,
+}) => {
   const classes = useStyles();
-  const [volume, setVolume] = useState<number>(value);
+  const [state, setState] = useState<number>(value);
 
   const handleChange = (event: any, newValue: number | number[]) => {
-    setVolume(newValue as number);
+    setState(newValue as number);
     changeOneSettingsParameter({ [name]: newValue as number });
   };
 
   return (
     <div className={classes.root}>
       <Slider
-        min={0}
-        max={10}
-        value={volume}
+        min={min}
+        max={max}
+        step={step}
+        marks={marks}
+        value={state}
         className={classes.slider}
         onChange={handleChange}
       />
       <p>
-        {volume}
+        {state}
       </p>
     </div>
   );

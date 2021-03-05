@@ -6,6 +6,7 @@ import Settings from '../../components/Settings/Settings';
 import Statistics from '../../components/Statistics/Statistics';
 import KeyboardKeys from '../../components/KeyboardKeys/KeyboardKeys';
 import constants from '../../constants';
+import { ISettings } from '../../interfaces';
 
 const useStyles = makeStyles(() => createStyles({
   root: {
@@ -20,15 +21,6 @@ const useStyles = makeStyles(() => createStyles({
     flexDirection: 'column',
   },
 }));
-
-interface ISettings {
-  applicationMusic: boolean,
-  applicationMusicVolume: number,
-  gameMusic: boolean,
-  gameMusicVolume: number,
-  gameSounds: boolean,
-  gameSoundsVolume: number,
-}
 
 const GamePage: React.FC = () => {
   const [settings, setSettings] = useState<ISettings>(constants.DEFAULT_SETTINGS);
