@@ -19,4 +19,30 @@ export default {
     snakeFoodColor: '#ff0000',
     snakeGrowth: true,
   },
+  KEYBOARD_KEYS: [
+    {
+      key: 'Arrow left',
+      description: 'Move left',
+    },
+    {
+      key: 'Arrow right',
+      description: 'Move right',
+    },
+    {
+      key: 'Arrow up',
+      description: 'Move up',
+    },
+    {
+      key: 'Arrow down',
+      description: 'Move down',
+    },
+    {
+      key: 'Space',
+      description: 'Pause/continue game',
+    },
+    {
+      key: 'F9',
+      description: 'Activate/deactivate fullscreen',
+    },
+  ],
 };
