@@ -8,6 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import ListItem from '@material-ui/core/ListItem';
+import constants from '../../constants';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -64,34 +65,7 @@ interface IProps {
 const KeyboardKeys: React.FC<IProps> = ({ open, handleOnClose }) => {
   const classes = useStyles();
 
-  // const [data, setData] = useState<IScore[]>([]);
-
-  const data: IKeys[] = [
-    {
-      key: 'Arrow left',
-      description: 'Move left',
-    },
-    {
-      key: 'Arrow right',
-      description: 'Move right',
-    },
-    {
-      key: 'Arrow up',
-      description: 'Move up',
-    },
-    {
-      key: 'Arrow down',
-      description: 'Move down',
-    },
-    {
-      key: 'Space',
-      description: 'Pause/continue game',
-    },
-    {
-      key: 'F9',
-      description: 'Activate/deactivate fullscreen',
-    },
-  ];
+  const data: IKeys[] = constants.KEYBOARD_KEYS;
 
   return (
     <Dialog
@@ -103,38 +77,38 @@ const KeyboardKeys: React.FC<IProps> = ({ open, handleOnClose }) => {
       className={classes.root}
     >
       <DialogContent>
-        <Grid container spacing={2} className={classes.statistics}>
-          <Grid item xs={12} md={12}>
-            <Typography variant="h6" className={classes.title}>
-              Statistics
-            </Typography>
-            <List className={classes.statistics__list}>
-              <ListItem className={classes.statistics__listItem}>
-                <p className={classes.statistics__headerBlock}>
-                  Key
-                </p>
-                <p className={classes.statistics__headerBlock}>
-                  Description
-                </p>
-              </ListItem>
-              { data.length
-                ? data.map((item) => (
-                  <ListItem key={item.key} className={classes.statistics__listItem}>
-                    <p className={classes.statistics__block}>
-                      {item.key}
-                    </p>
-                    <p className={classes.statistics__block}>
-                      {item.description}
-                    </p>
-                  </ListItem>
-                )) : (
-                  <p>
-                    No data
+        <div className={classes.statistics}>
+          {/* <Grid item xs={12} md={12}> */}
+          <Typography variant="h6" className={classes.title}>
+            Keyboard keys
+          </Typography>
+          <List className={classes.statistics__list}>
+            <ListItem className={classes.statistics__listItem}>
+              <p className={classes.statistics__headerBlock}>
+                Key
+              </p>
+              <p className={classes.statistics__headerBlock}>
+                Description
+              </p>
+            </ListItem>
+            { data.length
+              ? data.map((item) => (
+                <ListItem key={item.key} className={classes.statistics__listItem}>
+                  <p className={classes.statistics__block}>
+                    {item.key}
                   </p>
-                )}
-            </List>
-          </Grid>
-        </Grid>
+                  <p className={classes.statistics__block}>
+                    {item.description}
+                  </p>
+                </ListItem>
+              )) : (
+                <p>
+                  No data
+                </p>
+              )}
+          </List>
+          {/* </Grid> */}
+        </div>
       </DialogContent>
       <DialogActions>
         <Button

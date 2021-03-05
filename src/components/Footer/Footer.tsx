@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     width: '100%',
     marginTop: 'auto',
     backgroundColor: theme.palette.primary.main,
-    zIndex: 10,
+    zIndex: 0,
   },
   footerLogo: {
     width: '100px',

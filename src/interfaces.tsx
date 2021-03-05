@@ -7,10 +7,19 @@ export interface ICoordinates {
 export interface IDirections {
   [key: string]: ICoordinates;
 }
-
-export interface IGameField {
-  time: number;
-  snake: ICoordinates[];
+export interface ISettings {
+  applicationMusic: boolean;
+  applicationMusicVolume: number;
+  gameMusic: boolean;
+  gameMusicVolume: number;
+  gameSounds: boolean;
+  gameSoundsVolume: number;
+  snakeSpeed: number;
+  snakeHeadColor: string;
+  snakeBodyColor: string;
+  snakeFieldColor: string;
+  snakeFoodColor: string;
+  snakeGrowth: boolean;
 }
 
 export interface IGameBoardProps {
@@ -19,19 +28,9 @@ export interface IGameBoardProps {
   isFullScreen: boolean;
   handleOnKeydown?: (e: React.KeyboardEvent) => void;
   children?: React.ReactNode;
+  isGameFinished: boolean;
+  settings: ISettings;
 }
-
-export interface IMenu {
-  list?: string[];
-  menuItemClick: (newOpened: string) => void;
-  children?: React.ReactNode;
-}
-export interface IMenuItem {
-  text: string;
-  onClick: (newOpened: string) => void;
-  children?: React.ReactNode;
-}
-
 export interface IGameFieldProps {
   openMenu: () => void;
 }

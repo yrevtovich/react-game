@@ -22,7 +22,10 @@ interface IProps {
 }
 
 const GameOverModal: React.FC<IProps> = ({
-  open, score, restart, close,
+  open,
+  score,
+  restart,
+  close,
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [isEmpty, setIsEmpty] = useState(true);

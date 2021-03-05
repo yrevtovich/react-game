@@ -1,11 +1,16 @@
-/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import GameBoard from '../GameBoard/GameBoard';
 import GameOverModal from '../GameOverModal/GameOverModal';
 import constants from '../../constants';
-import { ICoordinates, IDirections } from '../../interfaces';
+import { ICoordinates, IDirections, ISettings } from '../../interfaces';
 import GameHeader from '../GameHeader/GameHeader';
+
+import menuSoundFile from '../../assets/audio/menu_music.mp3';
+import gameMusicFile from '../../assets/audio/game_music.mp3';
+import eatSoundFile from '../../assets/audio/eat.mp3';
+import incorrectSoundFile from '../../assets/audio/incorrect.mp3';
 
 import './game.css';
 
@@ -22,9 +27,24 @@ interface IProps {
   toggleStatistics: () => void;
   toggleSettings: () => void;
   toggleKeyboardKeys: () => void;
+  settings: ISettings;
 }
 
-const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboardKeys }) => {
+interface ISavedData {
+  snake: ICoordinates[];
+  food: ICoordinates;
+  score: number;
+  isGameInProgress: boolean;
+  isGameFinished: boolean;
+  direction: ICoordinates;
+}
+
+const Game: React.FC<IProps> = ({
+  toggleStatistics,
+  toggleSettings,
+  toggleKeyboardKeys,
+  settings,
+}) => {
   const {
     CELL_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
   } = constants;
@@ -40,8 +60,8 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreeen] = useState(false);
-
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [audio] = useState<HTMLAudioElement>(new Audio());
+  const [snakeSpeed, setSnakeSpeed] = useState<number>(settings.snakeSpeed);
 
   const toggleFullScreen = () => {
     setIsFullScreeen((state) => !state);
@@ -87,13 +107,30 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     getNewFood();
     setIsGameInProgress(true);
     setIsGameFinished(false);
+    setSnakeSpeed(settings.snakeSpeed);
   };
 
   const closeGameOverModal = () => {
     setIsGameOverModal(false);
   };
 
+  const playSound = (soundUrl: string) => {
+    const { gameSounds, gameSoundsVolume } = settings;
+
+    if (!gameSounds) {
+      return;
+    }
+    const newAudio = new Audio(soundUrl);
+    newAudio.volume = gameSoundsVolume / 10;
+    newAudio.play();
+  };
+
   const finishGame = () => {
+    playSound(incorrectSoundFile);
+    setTimeout(() => {
+      setIsGameInProgress(false);
+    }, 2000);
+    audio.pause();
     setIsGameFinished(true);
     setIsGameOverModal(true);
   };
@@ -171,7 +208,13 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     const isFoodCell = compareCoordinates(newHeadCoordinates, food);
 
     if (isFoodCell) {
-      setSnake([newHeadCoordinates, ...snake]);
+      playSound(eatSoundFile);
+
+      const newSnake = settings.snakeGrowth
+        ? [newHeadCoordinates, ...snake]
+        : [newHeadCoordinates, ...snake.slice(0, -1)];
+
+      setSnake(newSnake);
       setScore((state) => state + 1);
       getNewFood();
     } else {
@@ -179,30 +222,91 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
     }
   };
 
-  const loop = () => {
-    move();
-  };
-
   const stopGame = () => {
     setIsGameInProgress(false);
   };
 
+  const changeAudioParameters = (file: string, volume: number) => {
+    const srcRegExp = new RegExp(`${file}`);
+
+    if (!srcRegExp.exec(audio.src)) {
+      audio.src = file;
+    }
+
+    audio.volume = volume / 10;
+  };
+
   useEffect(() => {
-    canvasRef.current?.focus();
-    startNewGame();
+    const data = localStorage.getItem('snakeGameData');
+
+    if (data) {
+      const savedData = JSON.parse(data) as ISavedData;
+      setSnake(savedData.snake);
+      setFood(savedData.food);
+      setDirection(savedData.direction);
+      setIsGameFinished(savedData.isGameFinished);
+      setIsGameInProgress(false);
+    } else {
+      startNewGame();
+      setIsGameInProgress(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (!isGameInProgress) {
+    const {
+      applicationMusic,
+      applicationMusicVolume,
+      gameMusicVolume,
+      gameMusic,
+    } = settings;
+
+    if ((!gameMusic && !applicationMusic)
+      || (!applicationMusic && !isGameInProgress)
+      || (!gameMusic && isGameInProgress)
+    ) {
+      audio.pause();
       return;
     }
 
-    canvasRef.current?.focus();
-    const timeoutId = setTimeout(loop, 200);
+    if (isGameInProgress) {
+      changeAudioParameters(gameMusicFile, gameMusicVolume);
+    } else {
+      changeAudioParameters(menuSoundFile, applicationMusicVolume);
+    }
+
+    audio.loop = true;
+
+    if (audio.paused) {
+      audio.play();
+    }
+  }, [isGameInProgress, settings]);
+
+  useEffect(() => {
+    const save = () => {
+      const data = {
+        snake,
+        direction,
+        food,
+        score,
+        isGameInProgress,
+        isGameFinished,
+      };
+
+      localStorage.snakeGameData = JSON.stringify(data);
+    };
+
+    window.addEventListener('beforeunload', save);
+
+    if (!isGameInProgress) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(move, 500 / snakeSpeed);
     return () => {
+      window.removeEventListener('beforeunload', save);
       clearTimeout(timeoutId);
     };
-  }, [snake, direction, isGameInProgress]);
+  }, [snake, isGameInProgress, food, score, isGameFinished, snakeSpeed]);
 
   return (
     <>
@@ -220,8 +324,10 @@ const Game: React.FC<IProps> = ({ toggleStatistics, toggleSettings, toggleKeyboa
       <GameBoard
         snake={snake}
         food={food}
+        settings={settings}
         handleOnKeydown={handleOnKeydown}
         isFullScreen={isFullScreen}
+        isGameFinished={isGameFinished}
       />
       <GameOverModal
         open={isGameOverModal}
